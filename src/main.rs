@@ -1,8 +1,10 @@
 use crate::todo_service::todo_service_server::{TodoService, TodoServiceServer};
 use crate::todo_service::{CreateTodoRequest, CreateTodoResponse, Empty, ListTodoResponse, Todo};
+
 use diesel::r2d2::{ConnectionManager, Pool};
 use diesel::SqliteConnection;
 use futures::TryFutureExt;
+use redb::Database;
 use std::sync::{Arc, Mutex};
 use todo::{create_task, establish_connection};
 use tonic::{transport::Server, Request, Response, Status};
@@ -21,6 +23,7 @@ impl MyTodoService {
     }
 }
 
+#[allow(clippy::all)]
 #[tonic::async_trait]
 impl TodoService for MyTodoService {
     async fn create_todo(
@@ -35,14 +38,15 @@ impl TodoService for MyTodoService {
         );
         let rep = CreateTodoResponse {
             todo: Option::from(Todo {
-                id: "".to_string(),
-                create_time: "".to_string(),
-                update_time: "".to_string(),
-                status: "".to_string(),
-                title: "asdasd".to_string(),
+                id: resp.id,
+                create_time: resp.create_time.to_string(),
+                update_time: resp.update_time.to_string(),
+                status: resp.status,
+                title: resp.title,
                 message: resp.message,
             }),
         };
+
         Ok(Response::new(rep))
     }
 
@@ -60,6 +64,7 @@ impl TodoService for MyTodoService {
         todo!()
     }
 
+    #[allow(clippy::all)]
     async fn list_todo(
         &self,
         request: Request<Empty>,
@@ -82,7 +87,9 @@ impl TodoService for MyTodoService {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = "[::1]:50051".parse()?;
+    let db = Database::create("my_db.redb")?;
+
+    let addr = "0.0.0.0:50051".parse()?;
     let conn = establish_connection();
     let greeter = MyTodoService::new(conn);
 

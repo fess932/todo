@@ -12,3 +12,5 @@ Cargo.lock
 .idea
 .vscode
 autotests/files
+/migrations/.keep
+/sql.db

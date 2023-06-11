@@ -1,13 +1,13 @@
 pub mod models;
 pub mod schema;
 
-use clap::builder::Str;
+
 use diesel::prelude::*;
 use diesel::r2d2::{ConnectionManager, Pool};
 use dotenvy::dotenv;
 use std::env;
-use std::sync::{Arc, Mutex};
-use uuid::{uuid, Uuid};
+
+use uuid::{Uuid};
 
 use crate::models::{NewTask, Status, Task};
 

@@ -1,80 +1,94 @@
-use serde::{Deserialize, Serialize};
-use serde_json::json;
-use std::borrow::Cow;
-use surrealdb::engine::remote::ws::Ws;
-use surrealdb::opt::auth::Root;
-use surrealdb::Surreal;
+use crate::todo_service::todo_service_server::{TodoService, TodoServiceServer};
+use crate::todo_service::{CreateTodoRequest, CreateTodoResponse, Empty, ListTodoResponse, Todo};
+use diesel::r2d2::{ConnectionManager, Pool};
+use diesel::SqliteConnection;
+use futures::TryFutureExt;
+use std::sync::{Arc, Mutex};
+use todo::{create_task, establish_connection};
+use tonic::{transport::Server, Request, Response, Status};
 
-#[derive(Serialize, Deserialize)]
-struct Name {
-    first: Cow<'static, str>,
-    last: Cow<'static, str>,
+pub mod todo_service {
+    tonic::include_proto!("service");
 }
 
-#[derive(Serialize, Deserialize)]
-struct Person {
-    title: Cow<'static, str>,
-    name: Name,
-    marketing: bool,
+pub struct MyTodoService {
+    conn: Pool<ConnectionManager<SqliteConnection>>,
+}
+
+impl MyTodoService {
+    pub fn new(conn: Pool<ConnectionManager<SqliteConnection>>) -> Self {
+        MyTodoService { conn }
+    }
+}
+
+#[tonic::async_trait]
+impl TodoService for MyTodoService {
+    async fn create_todo(
+        &self,
+        request: Request<CreateTodoRequest>,
+    ) -> Result<Response<CreateTodoResponse>, Status> {
+        let r = request.into_inner();
+        let resp = create_task(
+            &mut self.conn.get().expect("failed to get sqlite conn"),
+            r.message.clone(),
+            r.message.clone(),
+        );
+        let rep = CreateTodoResponse {
+            todo: Option::from(Todo {
+                id: "".to_string(),
+                create_time: "".to_string(),
+                update_time: "".to_string(),
+                status: "".to_string(),
+                title: "asdasd".to_string(),
+                message: resp.message,
+            }),
+        };
+        Ok(Response::new(rep))
+    }
+
+    async fn add_todo(
+        &self,
+        request: Request<CreateTodoRequest>,
+    ) -> Result<Response<CreateTodoResponse>, Status> {
+        todo!()
+    }
+
+    async fn update_todo(
+        &self,
+        request: Request<CreateTodoRequest>,
+    ) -> Result<Response<CreateTodoResponse>, Status> {
+        todo!()
+    }
+
+    async fn list_todo(
+        &self,
+        request: Request<Empty>,
+    ) -> Result<Response<ListTodoResponse>, Status> {
+        todo!()
+    }
+    // async fn say_hello(
+    //     &self,
+    //     request: Request<HelloRequest>,
+    // ) -> Result<Response<HelloReply>, Status> {
+    //     println!("Got a request: {:?}", request);
+    //
+    //     let reply = hello_world::HelloReply {
+    //         message: format!("Hello {}!", request.into_inner().name).into(),
+    //     };
+    //
+    //     Ok(Response::new(reply))
+    // }
 }
 
 #[tokio::main]
-async fn main() -> surrealdb::Result<()> {
-    let db = surrealdb::engine::any::connect("file://temp.db").await?;
+async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let addr = "[::1]:50051".parse()?;
+    let conn = establish_connection();
+    let greeter = MyTodoService::new(conn);
 
-    // Signin as a namespace, database, or root user
-    db.signin(Root {
-        username: "root",
-        password: "root",
-    })
-    .await?;
-
-    // Select a specific namespace / database
-    db.use_ns("namespace").use_db("database").await?;
-
-    // Create a new person with a random ID
-    let created: Person = db
-        .create("person")
-        .content(Person {
-            title: "Founder & CEO".into(),
-            name: Name {
-                first: "Tobie".into(),
-                last: "Morgan Hitchcock".into(),
-            },
-            marketing: true,
-        })
+    Server::builder()
+        .add_service(TodoServiceServer::new(greeter))
+        .serve(addr)
         .await?;
-
-    // Create a new person with a specific ID
-    let created: Person = db
-        .create(("person", "jaime"))
-        .content(Person {
-            title: "Founder & COO".into(),
-            name: Name {
-                first: "Jaime".into(),
-                last: "Morgan Hitchcock".into(),
-            },
-            marketing: false,
-        })
-        .await?;
-
-    // Update a person record with a specific ID
-    let updated: Person = db
-        .update(("person", "jaime"))
-        .merge(json!({"marketing": true}))
-        .await?;
-
-    // Select all people records
-    let people: Vec<Person> = db.select("person").await?;
-
-    // Perform a custom advanced query
-    let sql = r#"
-        SELECT marketing, count()
-        FROM type::table($table)
-        GROUP BY marketing
-    "#;
-
-    let groups = db.query(sql).bind(("table", "person")).await?;
-
     Ok(())
 }

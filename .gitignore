@@ -14,3 +14,4 @@ Cargo.lock
 autotests/files
 /migrations/.keep
 /sql.db
+my_db.redb

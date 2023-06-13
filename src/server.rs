@@ -5,10 +5,7 @@ use service::{
     store::{self, Store},
     World,
 };
-use std::{
-    net::{IpAddr, Ipv4Addr, SocketAddr},
-    sync::Arc,
-};
+use std::net::{IpAddr, Ipv4Addr, SocketAddr};
 use tarpc::{
     context,
     server::{self, incoming::Incoming, Channel},
@@ -42,7 +39,8 @@ impl World for HelloServer {
 async fn main() -> anyhow::Result<()> {
     let flags = Flags::parse();
     let server_addr = (IpAddr::V4(Ipv4Addr::UNSPECIFIED), flags.port);
-    let db = Arc::new(store::connect());
+    // let db = Arc::new(store::connect());
+    let pool = store::get_connection_pool().await;
 
     // JSON transport is provided by the json_transport tarpc module. It makes it easy
     // to start up a serde-powered json serialization strategy over TCP.
@@ -59,7 +57,7 @@ async fn main() -> anyhow::Result<()> {
         .map(|channel| {
             let server = HelloServer {
                 income_addr: channel.transport().peer_addr().unwrap(),
-                store: Store { db: db.clone() },
+                store: Store { pool: pool.clone() },
             };
             channel.execute(server.serve())
         })

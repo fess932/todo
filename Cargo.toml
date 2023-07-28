@@ -10,8 +10,10 @@ clap = { version = "4.3.11", features = ["derive"] }
 log = "0.4.19"
 futures = "0.3.28"
 rand = "0.8.5"
+
 tarpc = { version = "0.33.0", features = ["full"] }
 tokio = { version = "1.29.1", features = ["full"] }
+
 sqlx = { version = "0.7.0", features = ["runtime-tokio-rustls", "sqlite"] }
 
 # my db
@@ -27,8 +29,8 @@ path = "src/lib.rs"
 
 [[bin]]
 name = "server"
-path = "src/server.rs"
+path = "src/server/server.rs"
 
 [[bin]]
-name = "client"
-path = "src/client.rs"
+name = "cmd"
+path = "src/cmd/cmd.rs"

@@ -6,19 +6,19 @@ edition = "2021"
 [dependencies]
 # tarpc
 anyhow = "1.0.71"
-clap = { version = "4.3.3", features = ["derive"] }
+clap = { version = "4.3.11", features = ["derive"] }
 log = "0.4.19"
 futures = "0.3.28"
 rand = "0.8.5"
 tarpc = { version = "0.33.0", features = ["full"] }
-tokio = { version = "1.28.2", features = ["full"] }
-sqlx = { version = "0.6.3", features = ["runtime-tokio-rustls", "sqlite"] }
+tokio = { version = "1.29.1", features = ["full"] }
+sqlx = { version = "0.7.0", features = ["runtime-tokio-rustls", "sqlite"] }
 
 # my db
 # redb = { version = "0.22.0" }
 chrono = { version = "0.4.26", features = ["serde"] }
-serde = { version = "1.0.164", features = ["derive"] }
-serde_json = { version = "1.0.96" }
+serde = { version = "1.0.171", features = ["derive"] }
+serde_json = { version = "1.0.102" }
 dotenvy = "0.15.7"
 
 [lib]

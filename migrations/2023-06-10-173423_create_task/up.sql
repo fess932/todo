@@ -8,5 +8,3 @@ create table task
     title       text                                    not null,
     message     text                                    not null
 )
-
-

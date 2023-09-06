@@ -6,7 +6,7 @@ build:
 release:
 	cargo build --profile release
 run:
-	cargo run
+	RUST_LOG=tower_http=trace cargo run --bin server
 
 clean_local_registry:
 	rm -rf ~/.cargo/registry

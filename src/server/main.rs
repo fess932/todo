@@ -1,4 +1,5 @@
 use anyhow::Context;
+use axum::response::IntoResponse;
 use axum::Extension;
 use axum::{http::StatusCode, routing::get, Json, Router};
 use models::errors::{CustomError, CustomErrorEnum};
@@ -7,6 +8,7 @@ use models::message::{NewTask, Task};
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::SqlitePool;
 use tower_http::trace::TraceLayer;
+use tracing::field::debug;
 
 #[tokio::main]
 async fn main() {
@@ -35,8 +37,26 @@ async fn main() {
         .unwrap();
 }
 
-async fn new_task(Json(payload): Json<NewTask>) -> (StatusCode, Json<Task>) {
-    (StatusCode::CREATED, Json(message::new_task(payload.name)))
+async fn new_task(
+    Extension(pool): Extension<SqlitePool>,
+    Json(payload): Json<NewTask>,
+) -> Result<impl IntoResponse, CustomError> {
+    let task = message::new_task(payload.name);
+    let task2 = task.clone();
+
+    sqlx::query(
+        "INSERT INTO task (id, created_at, updated_at, status, name) VALUES ($1, $2, $3, $4, $5)",
+    )
+    .bind(task.id)
+    .bind(task.created_at)
+    .bind(task.updated_at)
+    .bind(task.status)
+    .bind(task.name)
+    .execute(&pool)
+    .await
+    .map_err(|err| CustomErrorEnum::TaskNotFound.text(err.to_string()))?;
+
+    Ok((StatusCode::CREATED, Json(task2)))
 }
 
 async fn root(Extension(pool): Extension<SqlitePool>) -> Result<Json<Vec<Task>>, CustomError> {

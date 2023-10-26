@@ -8,7 +8,6 @@ use models::message::{NewTask, Task};
 use sqlx::sqlite::SqlitePoolOptions;
 use sqlx::SqlitePool;
 use tower_http::trace::TraceLayer;
-use tracing::field::debug;
 
 #[tokio::main]
 async fn main() {
@@ -20,13 +19,12 @@ async fn main() {
         .await
         .context("could not connect to database url")
         .unwrap();
-
     sqlx::migrate!("./migrations").run(&pool).await.unwrap();
 
     // build our application with a route
     let app = Router::new()
         // `GET /` goes to `root`
-        .route("/", get(root).post(new_task))
+        .route("/", get(list_task).post(new_task))
         // `POST /users` goes to `create_user`
         .layer(Extension(pool))
         .layer(TraceLayer::new_for_http());
@@ -59,7 +57,7 @@ async fn new_task(
     Ok((StatusCode::CREATED, Json(task2)))
 }
 
-async fn root(Extension(pool): Extension<SqlitePool>) -> Result<Json<Vec<Task>>, CustomError> {
+async fn list_task(Extension(pool): Extension<SqlitePool>) -> Result<Json<Vec<Task>>, CustomError> {
     let task = sqlx::query_as::<_, Task>("SELECT * FROM task")
         .fetch_all(&pool)
         .await

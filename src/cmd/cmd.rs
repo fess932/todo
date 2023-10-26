@@ -12,12 +12,6 @@ fn main() {
         "Orange",
         "Pear",
         "Avocado",
-        "Avocado",
-        "Avocado",
-        "Avocado",
-        "Avocado",
-        "Avocado",
-        "Avocado",
         "Pineapple",
     ];
 

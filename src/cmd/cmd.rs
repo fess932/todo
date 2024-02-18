@@ -17,7 +17,7 @@ async fn main() {
 
     match ans {
         Ok(choice) => {
-            toggle_task(choice.id).await.expect("wtf");
+            toggle_task(choice).await.expect("wtf");
             println!("Ok")
         }
         Err(_) => println!("There was an error, please try again"),
@@ -48,12 +48,17 @@ async fn create_task(t: String) -> Result<(), Box<dyn std::error::Error>> {
     Ok(())
 }
 
-async fn toggle_task(id: String) -> Result<(), Box<dyn std::error::Error>> {
+async fn toggle_task(t: Task) -> Result<(), Box<dyn std::error::Error>> {
     let client = reqwest::Client::new();
-    let toggle = format!("{}/task/done", TARGET);
+    let toggle = match t.status.as_str() {
+        "init" => format!("{}/task/done", TARGET),
+        "done" => format!("{}/task/undone", TARGET),
+        _ => "wtf".to_string(),
+    };
+
     client
         .post(toggle)
-        .json(&UpdateTask { id })
+        .json(&UpdateTask { id: t.id })
         .send()
         .await
         .unwrap()

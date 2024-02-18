@@ -8,6 +8,9 @@ release:
 run:
 	RUST_LOG=tower_http=trace cargo run --bin server
 
+cli:
+	RUST_LOG=tower_http=trace cargo run --bin cli
+
 clean_local_registry:
 	rm -rf ~/.cargo/registry
 

@@ -6,11 +6,11 @@ edition = "2021"
 [dependencies]
 # main
 tokio = { version = "1.29.1", features = ["full"] }
-axum = { version = "0.6.20" }
+axum = { version = "0.7.4" }
 serde = { version = "1.0.171", features = ["derive"] }
 serde_json = { version = "1.0.102" }
 tower = { version = "0.4.13" }
-tower-http = { version = "0.4.4", features = ["trace"] }
+tower-http = { version = "0.5.1", features = ["trace"] }
 sqlx = { version = "0.7.0", features = ["runtime-tokio", "sqlite", "chrono"] }
 tracing = "0.1.37"
 tracing-subscriber = "0.3.17"
@@ -26,7 +26,9 @@ uuid = { version = "1.4.1", features = ["v4"] }
 # cmd
 crossterm = { version = "0.27.0" }
 tui = { version = "0.19.0" }
-inquire = { version = "*", features = ["crossterm", "editor"] }
+inquire = { version = "0.6.2", features = ["crossterm", "editor"] }
+reqwest = { version = "0.11.24", features = ["json"] }
+colored = "2.1.0"
 
 [[bin]]
 name = "server"
@@ -37,5 +39,5 @@ name = "models"
 path = "src/models/lib.rs"
 
 [[bin]]
-name = "cmd"
+name = "cli"
 path = "src/cmd/cmd.rs"

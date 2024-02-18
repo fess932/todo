@@ -1,7 +1,6 @@
-// use chrono::serde::ts_microseconds;
-// use chrono::{DateTime, NaiveDateTime, Utc};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use std::fmt;
 use uuid::Uuid;
 
 #[derive(Debug, Default, Serialize, Deserialize, sqlx::FromRow, Clone)]
@@ -11,6 +10,17 @@ pub struct Task {
     pub id: String,
     pub name: String,
     pub status: String,
+}
+impl fmt::Display for Task {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        let status = match self.status.as_str() {
+            "init" => "✅ ",
+            "done" => "❌ ",
+            _ => "wtf",
+        };
+
+        write!(f, "{}: {} [dbg {}]", status, self.name, self.id)
+    }
 }
 
 pub fn new_task(message: String) -> Task {
@@ -26,4 +36,9 @@ pub fn new_task(message: String) -> Task {
 #[derive(Serialize, Deserialize, sqlx::FromRow)]
 pub struct NewTask {
     pub name: String,
+}
+
+#[derive(Serialize, Deserialize, sqlx::FromRow)]
+pub struct UpdateTask {
+    pub id: String,
 }

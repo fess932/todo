@@ -1,0 +1,78 @@
+user: root # default ssh user. Can be overridden by -u flag or by inventory or host definition
+ssh_key: ~/.ssh/onering_ed25519 # ssh key
+ssh_shell: /bin/bash # shell to use for remote ssh execution, default is /bin/sh
+local_shell: /bin/bash # shell to use for local execution, default is os shell
+
+targets:
+  - "feziv.ru"
+
+task:
+  - name: some command
+    script: |
+      echo all good, 123
+
+  - name: build
+    options: { local: true }
+    script: |
+      make build
+  - name: deploy
+# # # list of targets, i.e. hosts, inventory files or inventory URLs
+# # targets:
+# #   prod:
+# #     hosts: # list of hosts, user, name and port optional.
+# #       - { host: "ya.ru", user: "root", name: "h1" }
+
+# # list of tasks, i.e. commands to execute
+# tasks:
+#   - name: deploy-things
+#     # on_error: "curl -s localhost:8080/error?msg={SPOT_ERROR}" # call hook on error
+#     commands:
+#       - name: some command
+#         script: |
+#           ls -laR /tmp
+#           du -hcs /srv
+#           cat /tmp/conf.yml
+#           echo all good, 123
+#       # - name: wait
+#       #   script: sleep 5s
+
+#       # - name: copy configuration
+#       #   copy:
+#       #     { "src": "testdata/conf.yml", "dst": "/tmp/conf.yml", "mkdir": true }
+
+#       # - name: copy other files
+#       #   copy:
+#       #     - {
+#       #         "src": "testdata/f1.csv",
+#       #         "dst": "/tmp/things/f1.csv",
+#       #         "recur": true,
+#       #       }
+#       #     - {
+#       #         "src": "testdata/f2.csv",
+#       #         "dst": "/tmp/things/f2.csv",
+#       #         "recur": true,
+#       #       }
+
+#       # - name: sync things
+#       #   sync: { "src": "testdata", "dst": "/tmp/things" }
+
+#       # - name: delete things
+#       #   delete: { "path": "/tmp/things", "recur": true }
+
+#       # - name: show content
+#       #   script: ls -laR /tmp
+
+#   # - name: docker
+#   #   commands:
+#   #     - name: docker pull and start
+#   #       script: |
+#   #         docker pull umputun/remark42:latest
+#   #         docker stop remark42 || true
+#   #         docker rm remark42 || true
+#   #         docker run -d --name remark42 -p 8080:8080 umputun/remark42:latest
+#   #       env: { FOO: bar, BAR: qux } # set environment variables for the command
+#   #     - wait: {
+#   #           cmd: "curl -s localhost:8080/health",
+#   #           timeout: "10s",
+#   #           interval: "1s",
+#   #         } # wait for health check to pass

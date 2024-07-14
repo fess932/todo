@@ -50,16 +50,16 @@ async fn new_task(
 
     // language=sqlite
     sqlx::query(
-        "insert INTO task (id, created_at, updated_at, status, name) VALUES ($1, $2, $3, $4, $5)",
+        "insert into task (id, created_at, updated_at, status, name) values ($1, $2, $3, $4, $5)"
     )
-    .bind(task.id)
-    .bind(task.created_at)
-    .bind(task.updated_at)
-    .bind(task.status)
-    .bind(task.name)
-    .execute(&pool)
-    .await
-    .map_err(|err| CustomErrorEnum::TaskNotFound.text(err.to_string()))?;
+        .bind(task.id)
+        .bind(task.created_at)
+        .bind(task.updated_at)
+        .bind(task.status)
+        .bind(task.name)
+        .execute(&pool)
+        .await
+        .map_err(|err| CustomErrorEnum::TaskNotFound.text(err.to_string()))?;
 
     Ok((StatusCode::CREATED, Json(task2)))
 }
@@ -72,11 +72,11 @@ async fn done_task(
     let task = sqlx::query_as::<_, Task>(
         "update task set status='done', updated_at=$1 where id=$2 returning *",
     )
-    .bind(Utc::now())
-    .bind(payload.id)
-    .fetch_one(&pool)
-    .await
-    .map_err(|err| CustomErrorEnum::TaskNotFound.text(err.to_string()))?;
+        .bind(Utc::now())
+        .bind(payload.id)
+        .fetch_one(&pool)
+        .await
+        .map_err(|err| CustomErrorEnum::TaskNotFound.text(err.to_string()))?;
 
     Ok((StatusCode::OK, Json(task)))
 }
@@ -89,18 +89,18 @@ async fn undone_task(
     let task = sqlx::query_as::<_, Task>(
         "update task set status='init', updated_at=$1 where id=$2 returning *",
     )
-    .bind(Utc::now())
-    .bind(payload.id)
-    .fetch_one(&pool)
-    .await
-    .map_err(|err| CustomErrorEnum::TaskNotFound.text(err.to_string()))?;
+        .bind(Utc::now())
+        .bind(payload.id)
+        .fetch_one(&pool)
+        .await
+        .map_err(|err| CustomErrorEnum::TaskNotFound.text(err.to_string()))?;
 
     Ok((StatusCode::OK, Json(task)))
 }
 
 async fn list_task(Extension(pool): Extension<SqlitePool>) -> Result<Json<Vec<Task>>, CustomError> {
     // language=sqlite
-    let task = sqlx::query_as::<_, Task>("SELECT * FROM task")
+    let task = sqlx::query_as::<_, Task>("select * from task")
         .fetch_all(&pool)
         .await
         .map_err(|err| CustomErrorEnum::TaskNotFound.text(err.to_string()))?;
